@@ -11,3 +11,4 @@ detectedimage = detect_curved_lanes(frame)
 
 # Clean up windows
 cv2.destroyAllWindows()
+print("hello")
