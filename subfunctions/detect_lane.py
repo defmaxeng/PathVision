@@ -6,20 +6,20 @@ def detect_curved_lanes(image):
     Detect lanes using linear regression for bottom 50% and polynomial for upper part
     """
     height, width = image.shape[:2]
-
+    midpoint = (int(width*0.48), int(height*0.6))
     # Preprocessing steps
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 70, 130)
-    cv2.line(edges, (int(width/2.2), height), (int(width/2.2), 0), (255, 0, 0), 1)
+    cv2.line(edges, (int(width/2.1), height), (int(width/2.1), 0), (255, 0, 0), 1)
     
     cv2.imshow('Canny Edge Detection', edges)
 
     # Create ROI mask
     roi_vertices = np.array([
         [(width/33, height),
-         (width//2.2 - 70, height//1.8 + 10),
-         (width//2.2 + 70, height//1.8 + 10),
+         (midpoint[0] - 70, height//1.8 + 10),
+         (midpoint[0] + 70, height//1.8 + 10),
          (width*3/3, height)]
     ], dtype=np.int32)
     
@@ -134,8 +134,9 @@ def detect_curved_lanes(image):
         
         # Draw a line showing the split between linear and polynomial regions
         cv2.line(result, (0, bottom_cutoff), (width, bottom_cutoff), (255, 0, 0), 1)
-        cv2.line(result, (int(width/2.2), height), (int(width/2.2), 0), (255, 0, 0), 1)
-    
+        cv2.line(result, (int(width*0.48), height), (int(width*0.48), 0), (255, 0, 0), 1)
+        cv2.line(result, (0, int(height*0.6)), (width, int(height*0.6)), (255, 0, 0), 1)
+
     # Display the result
     cv2.imshow('Lane Detection', result)
     cv2.waitKey(0)
