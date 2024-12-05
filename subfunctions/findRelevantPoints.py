@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-
 def findRelativeWhitePoints(image, show_visualization=True):
     height, width = image.shape[:2]
     midpoint = np.array([int(width*0.48), int(height*0.6)])
@@ -27,12 +26,9 @@ def findRelativeWhitePoints(image, show_visualization=True):
                  (int(endpoint[0]), int(endpoint[1])), 
                  255, 2)
         
-        # Show the original and filtered images side by side
-        combined = np.hstack((image, visualization))
-        cv2.imshow('Original Edges | Filtered Edges', combined)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-    
+        # Just show the visualization
+        cv2.imshow('Filtered Edges', visualization)
+  
     return edge_points, visualization
 
 def point_to_line_distance(point, line_point1, line_point2):
