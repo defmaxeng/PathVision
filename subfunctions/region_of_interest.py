@@ -1,6 +1,48 @@
 import cv2
 import numpy as np
-def findRelativeWhitePoints(image, show_visualization=True):
+
+def apply_region_of_interest(image):
+    # establish variables
+    height, width = image.shape[:2]
+    midpoint = (int(width*0.46), int(height*0.64))
+    margin_of_error = 40
+    lower_left_vertex = (width*0.16, height)
+    lower_right_vertex = (width-width*0.28, height)
+
+
+
+    #Make shape
+    roi_vertices = np.array([
+        [(lower_left_vertex[0]-margin_of_error, lower_left_vertex[1]),
+         (midpoint[0] - margin_of_error, midpoint[1]),
+         (midpoint[0] + margin_of_error, midpoint[1]),
+         (lower_right_vertex[0] + margin_of_error, lower_right_vertex[1]),
+         (lower_right_vertex[0] - margin_of_error, lower_right_vertex[1]),
+         (midpoint[0], midpoint[1]+margin_of_error),
+         (lower_left_vertex[0]+margin_of_error, lower_left_vertex[1])
+         ]
+    ], dtype=np.int32)
+    
+    mask = np.zeros_like(image)
+    cv2.fillPoly(mask, roi_vertices, 255)
+    masked_edges = cv2.bitwise_and(image, mask)
+    cv2.imshow('Region of Interest', masked_edges)
+    roi_display = image.copy()
+    # Draw filled polygon
+    overlay = roi_display.copy()
+    cv2.fillPoly(overlay, roi_vertices, (0, 255, 0))  # Green color
+    # Blend with original
+    alpha = 0.3
+    roi_display = cv2.addWeighted(overlay, alpha, roi_display, 1 - alpha, 0)
+    # Draw ROI boundaries
+    cv2.polylines(roi_display, roi_vertices, True, (125, 0, 0), 2)  # Red boundary
+    
+    # Display ROI
+    #cv2.imshow('Region of Interest', masked_edges)
+    return masked_edges
+
+
+def find_Relative_White_Points(image, show_visualization=True):
     height, width = image.shape[:2]
     midpoint = np.array([int(width*0.48), int(height*0.6)])
     endpoint = np.array([width*0.24, height])

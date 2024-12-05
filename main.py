@@ -7,8 +7,9 @@ from subfunctions.detect_lane import detect_curved_lanes
 # Example:
 # frame = get_frame_at_time('images/californiaLanes.mp4', 9)  # Gets frame at 5 seconds
 
-frame = get_frame_at_time('images/californiaLanes.mp4', 11)  # Gets frame at 5 seconds
-detectedimage = detect_curved_lanes(frame)
+for x in range (10):
+
+    frame = get_frame_at_time('images/californiaLanes.mp4', x)  # Gets frame at 5 seconds
+    detectedimage = detect_curved_lanes(frame)
 
 # Clean up windows
-cv2.destroyAllWindows()
