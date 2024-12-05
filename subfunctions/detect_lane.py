@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from findRelevantPoints import findRelativeWhitePoints
+
 
 def detect_curved_lanes(image):
     """
@@ -10,7 +12,8 @@ def detect_curved_lanes(image):
     # Preprocessing steps
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    edges = cv2.Canny(blurred, 70, 130)
+    edges = cv2.Canny(blurred, 20, 50)
+    # findRelativeWhitePoints(edges)
     cv2.line(edges, (int(width/2.1), height), (int(width/2.1), 0), (255, 0, 0), 1)
     
     cv2.imshow('Canny Edge Detection', edges)
