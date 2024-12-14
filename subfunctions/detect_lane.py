@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from subfunctions.region_of_interest import apply_region_of_interest
-from subfunctions.locate_road_cracks import detect_dark_spots, visualize_dark_spots
+from subfunctions.find_important_edges import locate_important_edges
 
 def detect_curved_lanes(image):
     """
@@ -12,19 +12,17 @@ def detect_curved_lanes(image):
     
     # Create a copy of the original image for drawing
     result_image = image.copy()
-    
     # Preprocessing steps
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    dark_spots = detect_dark_spots(gray)
-    dark_spots_image =  visualize_dark_spots(gray, dark_spots)
-    cv2.imshow("darkspots", dark_spots_image)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 70, 130)
     edges_of_interest = apply_region_of_interest(edges)
-    
+    locate_important_edges(edges_of_interest)
+
     # Get coordinates of non-zero pixels
     y_coords, x_coords = np.nonzero(edges_of_interest)
     
+
     # Separate points to left and right of midpoint
     left_mask = x_coords < midpoint[0]
     right_mask = x_coords >= midpoint[0]
@@ -76,9 +74,6 @@ def detect_curved_lanes(image):
                      (x_avg_1, y_points[i]), 
                      (x_avg_2, y_points[i+1]), 
                      (0, 255, 0), 2)  # Green color
-    cv2.namedWindow('final_image', cv2.WINDOW_NORMAL)
-    # Set the window size (width, height)
-    cv2.resizeWindow('final_image', 700, 400)  # Adjust these values as needed
     
-    cv2.imshow("final_image", result_image) 
+    # cv2.imshow("final_image", result_image) 
     cv2.waitKey(0)

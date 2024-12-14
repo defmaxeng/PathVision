@@ -26,10 +26,7 @@ def apply_region_of_interest(image):
     masked_edges = cv2.bitwise_and(image, mask)
     
     # Create named window first
-    cv2.namedWindow('Region of Interest', cv2.WINDOW_NORMAL)
-    # Set the window size (width, height)
-    cv2.resizeWindow('Region of Interest', 700, 400)  # Adjust these values as needed
-    cv2.imshow('Region of Interest', masked_edges)
+    # cv2.imshow('Region of Interest', masked_edges)
     roi_display = image.copy()
     overlay = roi_display.copy()
     cv2.fillPoly(overlay, roi_vertices, (0, 255, 0))
@@ -37,10 +34,7 @@ def apply_region_of_interest(image):
     roi_display = cv2.addWeighted(overlay, alpha, roi_display, 1 - alpha, 0)
     cv2.polylines(roi_display, roi_vertices, True, (125, 0, 0), 2)
     
-    cv2.namedWindow('maskshown', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('maskshown', 700, 400)  # Adjust these values as needed
-    
-    cv2.imshow('maskshown', roi_display)
+    # cv2.imshow('maskshown', roi_display)
 
     return masked_edges
 
@@ -70,7 +64,7 @@ def find_Relative_White_Points(image, show_visualization=True):
         # Create named window and set size for visualization
         cv2.namedWindow('Filtered Edges', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Filtered Edges', 800, 600)  # Adjust these values as needed
-        cv2.imshow('Filtered Edges', visualization)
+        # cv2.imshow('Filtered Edges', visualization)
   
     return edge_points, visualization
 
