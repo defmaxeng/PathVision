@@ -17,19 +17,22 @@ def locate_important_edges(canny_image):
     regno = 0
     # Variable declarations
     height, width = canny_image.shape[:2]
-    highest_window_startpos = int(height * 0.7)
-    windowsize = 55
+    highest_window_startpos = int(height * 0.5)
+    windowsize = 15
     approx_midline = int(width * 0.46)
     
     # Arrays to store regression parameters (slope, intercept) for each side
     left_regressions = []
     right_regressions = []
-    left_x, left_y, right_x, right_y, extreme_image = extreme_xpoints(canny_image)
+    left_y, left_x, right_y, right_x, extreme_image = middle_xpoints(canny_image)
 
-    testimage = np.zeros_like()
-    for x, y in zip(left_x, left_y):
-        testimage[y, x] = 255  # Note: OpenCV uses [y, x] ordering
-    cv2.imshow("testimage", testimage)
+    # testimage = np.zeros_like(canny_image)
+    # for x, y in zip(left_x, left_y):
+    #     testimage[x, y] = 255  # Note: OpenCV uses [y, x] ordering
+    # for x, y in zip(right_x, right_y):
+    #     testimage[x, y] = 255  # Note: OpenCV uses [y, x] ordering
+        
+    # cv2.imshow("testimage", testimage)
     # Find all non-zero points (edge points)
     y_points, x_points = np.nonzero(canny_image)
     
@@ -80,13 +83,13 @@ def locate_important_edges(canny_image):
         if regression_params is not None:
             right_regressions.append(regression_params)
     
-    visualize_slopes_and_lines(extreme_image, left_regressions, right_regressions, 10)
+    visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
     print ("successful regressions: " + str(regyes) + "less successful: " + str(regno))
     return left_regressions, right_regressions
 
 import numpy as np
 
-def extreme_xpoints(canny_image):
+def middle_xpoints(canny_image):
     """
     Takes in a Canny image and returns:
     1. Arrays of x and y coordinates of first non-zero point in each row
@@ -107,7 +110,7 @@ def extreme_xpoints(canny_image):
 
     # Start from 65% of height to bottom
     for row in range(int(height * 0.65), height):
-        for column in range(0, approx_midline):
+        for column in range(approx_midline, 0, -1):
             if canny_image[row, column] != 0:
                 first_x_points.append(row)
                 first_y_points.append(column)
@@ -116,7 +119,7 @@ def extreme_xpoints(canny_image):
                 break
 
     for row in range(int(height * 0.65), height):
-        for column in range(width-1, approx_midline, -1):
+        for column in range(approx_midline, width):
             if canny_image[row, column] != 0:
                 last_x_points.append(row)
                 last_y_points.append(column)

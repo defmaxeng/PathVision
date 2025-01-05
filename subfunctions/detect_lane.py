@@ -39,7 +39,6 @@ def detect_curved_lanes(image):
     # Generate points for the regression lines - only for the bottom portion
     y_points = np.arange(int(height*0.62), height)
         
-    # Calculate predicted x values using np.poly1d
     if left_coeffs is not None:
         left_predicted = np.poly1d(left_coeffs)(y_points)
     else:
