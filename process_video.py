@@ -1,4 +1,6 @@
 import cv2
+from subfunctions.detect_lane import detect_curved_lanes
+
 def process_this_video(inputvideopath, outputvideopath):
     video = cv2.VideoCapture(inputvideopath)
     if not video.isOpened():
@@ -15,6 +17,7 @@ def process_this_video(inputvideopath, outputvideopath):
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
     codec = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'mp4v' for MP4 format
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(total_frames)
 
     output_video = cv2.VideoWriter(outputvideopath, codec, fps, (width, height))
 

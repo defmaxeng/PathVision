@@ -3,8 +3,10 @@ import cv2
 import matplotlib.image as mpimg
 from subfunctions.get_frame import get_frame_at_time
 from subfunctions.detect_lane import detect_curved_lanes
-from process_video import process_the_video
+from process_video import process_this_video
 
-input_video = "californiaLanes.mp4"
+input_video = "images/lane_video.mp4"
 output_video = "californiaLanes_guided.mp4"
-process_the_video(input_video, output_video)
+process_this_video(input_video, output_video)
+
+detect_curved_lanes(get_frame_at_time(input_video, 10))

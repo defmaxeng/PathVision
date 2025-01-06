@@ -26,26 +26,6 @@ def locate_important_edges(canny_image):
     right_regressions = []
     left_y, left_x, right_y, right_x, extreme_image = middle_xpoints(canny_image)
 
-    # testimage = np.zeros_like(canny_image)
-    # for x, y in zip(left_x, left_y):
-    #     testimage[x, y] = 255  # Note: OpenCV uses [y, x] ordering
-    # for x, y in zip(right_x, right_y):
-    #     testimage[x, y] = 255  # Note: OpenCV uses [y, x] ordering
-        
-    # cv2.imshow("testimage", testimage)
-    # Find all non-zero points (edge points)
-    y_points, x_points = np.nonzero(canny_image)
-    
-    # Separate points into left and right sides
-    left_indices = x_points < approx_midline
-    right_indices = x_points >= approx_midline
-    
-    # left_x = x_points[left_indices]
-    # left_y = y_points[left_indices]
-    # right_x = x_points[right_indices]
-    # right_y = y_points[right_indices]
-    
-    # Function to perform regression on a window of points using np.polyfit
     def window_regression(x_points, y_points, window_start, window_end):
         global regno
         global regyes
@@ -60,12 +40,10 @@ def locate_important_edges(canny_image):
             # polyfit returns coefficients [slope, intercept]
             coeffs = np.polyfit(window_x, window_y, 1)
             regyes += 1
-            print("window: ", str(window_start)," to ", str(window_end)," Value: ", window_y)
 
             return (coeffs[0], coeffs[1])  # slope, intercept
         
         else:
-            print("window: ", str(window_start)," to ", str(window_end), " nothing")
             regno += 1
         return None
     
@@ -83,9 +61,113 @@ def locate_important_edges(canny_image):
         if regression_params is not None:
             right_regressions.append(regression_params)
     
-    visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
-    print ("successful regressions: " + str(regyes) + "less successful: " + str(regno))
-    return left_regressions, right_regressions
+    # visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
+
+    regression_image = cv2.cvtColor(extreme_image, cv2.COLOR_GRAY2BGR)
+
+    # cv2.imshow('regression', regression_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    
+
+    # get_midline(find_most_common_slope(left_regressions), find_most_common_slope(right_regressions), height, width, extreme_image)
+
+    return get_midline(find_most_common_line(left_regressions), find_most_common_line(right_regressions), height, extreme_image)
+
+def get_midline(left_line, right_line, height, extreme_image):
+    """
+    Calculates and displays the midline based on the average x-coordinates
+    of the left and right lanes at each row.
+    
+    Parameters:
+    left_line: (slope, intercept) tuple for the left line
+    right_line: (slope, intercept) tuple for the right line
+    height: Height of the image
+    extreme_image: Grayscale image for visualization
+    """
+    # Unpack slope and intercept for both lines
+    left_slope, left_intercept = left_line
+    right_slope, right_intercept = right_line
+
+    # Create midline image
+    midline_image = cv2.cvtColor(extreme_image, cv2.COLOR_GRAY2BGR)
+
+    # Generate midline points
+    midline_points = []
+    for y in range(height):
+        # Calculate x-coordinates for left and right lines at the current row (y)
+        left_x = (y - left_intercept) / left_slope
+        right_x = (y - right_intercept) / right_slope
+
+        # Average the x-coordinates to find the midline point
+        mid_x = int((left_x + right_x) / 2)
+
+        # print("Left point:", left_x, "Right point:", right_x, "Mid point:", mid_x)
+        midline_points.append((mid_x, y))
+
+    # Draw the midline on the image
+    for i in range(len(midline_points) - 1):
+        cv2.line(midline_image, midline_points[i], midline_points[i + 1], (0, 255, 0), 2)
+
+    
+    # Display image with midline
+
+    # cv2.imshow('Midline', midline_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    return midline_image
+
+def find_most_common_line(lines, threshold=0.3):
+    """
+    Finds the most common slope from a list of slopes
+    
+    Parameters:
+    slopes: List of slope values
+    threshold: Minimum difference between slopes to be considered different
+    
+    Returns:
+    Most common slope
+    """
+    slopes = [slope[0] for slope in lines]
+
+    # Initialize dictionary to store counts
+    slope_counts = {}
+    
+    # Count occurrences of each slope
+    for slope in slopes:
+        found = False
+        for key in slope_counts:
+            if abs(slope - key) < threshold:
+                slope_counts[key] += 1
+                found = True
+                break
+        if not found:
+            slope_counts[slope] = 1
+    
+    # Find the most common slope
+    most_common_slope = max(slope_counts, key=slope_counts.get)
+
+    intercepts = [intercept[1] for intercept in lines]
+
+    # Initialize dictionary to store counts
+    intercept_counts = {}
+    
+    # Count occurrences of each slope
+    for intercept in intercepts:
+        found = False
+        for key in intercept_counts:
+            if abs(intercept - key) < threshold:
+                intercept_counts[key] += 1
+                found = True
+                break
+        if not found:
+            intercept_counts[intercept] = 1
+    
+    # Find the most common slope
+    most_common_intercept = max(intercept_counts, key=intercept_counts.get)
+    # print(most_common_slope, most_common_intercept)
+    return most_common_slope, most_common_intercept
 
 import numpy as np
 
