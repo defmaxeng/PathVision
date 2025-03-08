@@ -1,0 +1,61 @@
+Summary: The file seems to be composed of the three main subsections:
+
+
+
+1. Library and image imports, and some setting of global variables
+
+
+2. Lane Class
+
+
+3. Main Method
+
+
+
+
+
+
+Further analysis of step 1  -> library and image imports & setting of global variables
+    
+    Libraries required:
+     - cv2
+     - numpy
+     - edge_detections as edge       # handles the detection of lane lines. Details are inclued in the actual edge_detection.py file we have in the same directory
+
+
+    Files imported
+     - .mp4 file of size 3840x2160
+    
+    Files exported variable declaration
+     - driving.mp4
+
+
+    Global variables
+     - Not exactly sure but seemingly it stores the regressions from previous frames in order to affect future ones.
+     - It appears to save two iterations of lane detections
+
+
+
+
+
+
+Further analysis of step 2 -> the Lane Class
+
+    Constructor:
+        - Takes in the original frame of the image.
+        - 
+
+    Now Eleven Methods of fun :). Not going to lie, I'm not sure if order matters
+        1. Calculate Car Position
+        2. Calculate Curvature
+        3. Calculate Histogram 
+        4. Display Curvature offset
+        5. get lane line from the previous window
+        6. get lane line indices of sliding windows
+        7. get line markings
+        8. histogram_peak
+        9. overlay lane lines
+        10. Perspective transform
+        11. Plot ROI
+
+    

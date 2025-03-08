@@ -7,6 +7,5 @@ from process_video import process_this_video
 
 input_video = "images/lane_video.mp4"
 output_video = "californiaLanes_guided.mp4"
-process_this_video(input_video, output_video)
 
 detect_curved_lanes(get_frame_at_time(input_video, 10))

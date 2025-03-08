@@ -61,7 +61,7 @@ def locate_important_edges(canny_image):
         if regression_params is not None:
             right_regressions.append(regression_params)
     
-    # visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
+    visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
 
     regression_image = cv2.cvtColor(extreme_image, cv2.COLOR_GRAY2BGR)
 
@@ -78,7 +78,7 @@ def locate_important_edges(canny_image):
 def get_midline(left_line, right_line, height, extreme_image):
     """
     Calculates and displays the midline based on the average x-coordinates
-    of the left and right lanes at each row.
+    of the left and right lanes at each row. Only returns points with y > 300.
     
     Parameters:
     left_line: (slope, intercept) tuple for the left line
@@ -96,27 +96,24 @@ def get_midline(left_line, right_line, height, extreme_image):
     # Generate midline points
     midline_points = []
     for y in range(height):
-        # Calculate x-coordinates for left and right lines at the current row (y)
-        left_x = (y - left_intercept) / left_slope
-        right_x = (y - right_intercept) / right_slope
+        # Only process points with y > 300
+        if y > 500:
+            # Calculate x-coordinates for left and right lines at the current row (y)
+            left_x = (y - left_intercept) / left_slope
+            right_x = (y - right_intercept) / right_slope
 
-        # Average the x-coordinates to find the midline point
-        mid_x = int((left_x + right_x) / 2)
+            # Average the x-coordinates to find the midline point
+            mid_x = int((left_x + right_x) / 2)
 
-        # print("Left point:", left_x, "Right point:", right_x, "Mid point:", mid_x)
-        midline_points.append((mid_x, y))
+            # Add point to list
+            midline_points.append((mid_x, y))
 
-    # Draw the midline on the image
-    for i in range(len(midline_points) - 1):
-        cv2.line(midline_image, midline_points[i], midline_points[i + 1], (0, 255, 0), 2)
+    # Draw the midline on the image (only if there are at least 2 points)
+    if len(midline_points) > 1:
+        for i in range(len(midline_points) - 1):
+            cv2.line(midline_image, midline_points[i], midline_points[i + 1], (0, 255, 0), 2)
 
-    
-    # Display image with midline
-
-    # cv2.imshow('Midline', midline_image)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    return midline_image
+    return midline_points
 
 def find_most_common_line(lines, threshold=0.3):
     """

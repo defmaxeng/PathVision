@@ -17,6 +17,23 @@ def detect_curved_lanes(image):
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 70, 130)
     edges_of_interest = apply_region_of_interest(edges)
+    pathline = locate_important_edges(edges_of_interest)
     
-    return locate_important_edges(edges_of_interest)
+    # Draw the pathline points in green
+    for point in pathline:
+        # Convert tuple to integer coordinates
+        x, y = int(point[0]), int(point[1])
+        # Draw a small circle at each point
+        cv2.circle(result_image, (x, y), radius=3, color=(0, 255, 0), thickness=-1)
+    
+    # Optionally, connect the points with lines
+    if len(pathline) > 1:
+        # Convert pathline to numpy array of integers
+        points = np.array(pathline, dtype=np.int32)
+        # Draw lines connecting the points
+        cv2.polylines(result_image, [points], isClosed=False, color=(0, 255, 0), thickness=2)
+    
+    return result_image
+    
+
     
