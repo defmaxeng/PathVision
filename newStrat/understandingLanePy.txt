@@ -46,16 +46,18 @@ Further analysis of step 2 -> the Lane Class
         - 
 
     Now Eleven Methods of fun :). Not going to lie, I'm not sure if order matters
-        1. Calculate Car Position
-        2. Calculate Curvature
-        3. Calculate Histogram 
-        4. Display Curvature offset
-        5. get lane line from the previous window
-        6. get lane line indices of sliding windows
-        7. get line markings
-        8. histogram_peak
-        9. overlay lane lines
-        10. Perspective transform
-        11. Plot ROI
+        List:
+            1. Calculate Car Position
+            2. Calculate Curvature
+            3. Calculate Histogram 
+            4. Display Curvature offset
+            5. get lane line from the previous window
+            6. get lane line indices of sliding windows
+            7. get line markings
+            8. histogram_peak
+            9. overlay lane lines
+            10. Perspective transform
+            11. Plot ROI
 
-    
+        In more detail:
+        1. Calculate 
