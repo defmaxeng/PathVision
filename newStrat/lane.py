@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt # Used for plotting and error checking
 
 # Make sure the video file is in the same directory as your code
 print("11 works")
-filename = '../californiaLanes_guided.mp4'
+filename = '../images/californiaLanes.mp4'
 file_size = (1920,1080) # Assumes 1920x1080 mp4
 scale_ratio = 1 # Option to scale to fraction of original size.
 
@@ -348,8 +348,7 @@ class Lane:
    if plot==True:
       
      # Generate images to draw on
-     out_img = np.dstack((self.warped_frame, self.warped_frame, (
-                          self.warped_frame)))*255
+     out_img = np.dstack((self.warped_frame, self.warped_frame, (self.warped_frame)))*255
      window_img = np.zeros_like(out_img)
           
      # Add color to the left and right line pixels
@@ -761,7 +760,13 @@ def main():
 
  # Load a video
  cap = cv2.VideoCapture(filename)
-
+ fps = cap.get(cv2.CAP_PROP_FPS)
+ frame_number = int(3 * fps)
+    
+ cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+ ret, frame = cap.read()
+ cv2.imshow("Frame", frame)
+ cv2.waitKey(0)
 
  # Create a VideoWriter object so we can save the video output
  fourcc = cv2.VideoWriter_fourcc(*'mp4v')
