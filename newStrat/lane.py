@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt # Used for plotting and error checking
 
 
 # Make sure the video file is in the same directory as your code
-print("11 works")
-filename = '../images/californiaLanes.mp4'
+filename = '../images/lane_video.mp4'
 file_size = (1920,1080) # Assumes 1920x1080 mp4
 scale_ratio = 1 # Option to scale to fraction of original size.
 
@@ -38,19 +37,16 @@ prev_left_fit2 = []
 prev_right_fit2 = []
 
 
-print("before class works")
 class Lane:
  """
  Represents a lane on a road.
  """
- print("line 36")
  def __init__(self, orig_frame):
    """
      Default constructor
       
    :param orig_frame: Original camera image (i.e. frame)
    """
-   print("line 52")
    self.orig_frame = orig_frame
    
 
@@ -99,7 +95,7 @@ class Lane:
       
    # Sliding window parameters
    self.no_of_windows = 10
-   self.margin = int((1/12) * width)  # Window width is +/- margin
+   self.margin = int((1/18) * width)  # Window width is +/- margin
    self.minpix = int((1/24) * width)  # Min no. of pixels to recenter window
       
    # Best fit polynomial lines for left line and right line of the lane
@@ -123,8 +119,7 @@ class Lane:
    self.left_curvem = None
    self.right_curvem = None
    self.center_offset = None
-   print("before calc_car_position works")
- def calculate_car_position(self, print_to_terminal=False):
+ def calculate_car_position(self, print_to_terminal=False, draw_on_frame=True):
    """
    Calculate the position of the car relative to the center
       
@@ -153,7 +148,23 @@ class Lane:
      print(str(center_offset) + 'cm')
           
    self.center_offset = center_offset
-    
+   if draw_on_frame:
+    frame_copy = self.orig_frame.copy()  # Avoid modifying the original frame
+
+    # Define points for drawing the center lane line from bottom to top
+    y_vals = np.linspace(0, height - 1, num=height, dtype=int)  # All y-values from top to bottom
+    x_vals = (self.right_fit[0] * y_vals**2 + self.right_fit[1] * y_vals + self.right_fit[2] + 
+              self.left_fit[0] * y_vals**2 + self.left_fit[1] * y_vals + self.left_fit[2]) / 2  # Midpoint
+
+    # Convert points to integer format for OpenCV
+    lane_points = np.column_stack((x_vals.astype(int), y_vals))
+
+    # Draw the center lane line (blue) on the frame
+    for i in range(1, len(lane_points)):
+        cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
+
+    self.orig_frame = frame_copy  # Update the frame with the overlay
+    cv2.imshow("Frame with Center Lane Line", self.orig_frame)
    return center_offset
 
 
@@ -221,7 +232,7 @@ class Lane:
    return self.histogram
 
 
- def display_curvature_offset(self, frame=None, plot=False):
+ def display_curvature_offset(self, frame=None, plot=True):
    """
    Display curvature and offset statistics on the image
       
@@ -310,10 +321,10 @@ class Lane:
    self.rightx = rightx
    self.lefty = lefty
    self.righty = righty
-      
+   print("left fit: ", left_fit)
    left_fit = np.polyfit(lefty, leftx, 2)
    right_fit = np.polyfit(righty, rightx, 2)
-
+   
 
    # Add the latest polynomial coefficients       
    prev_left_fit2.append(left_fit)
@@ -365,8 +376,8 @@ class Lane:
      right_line_pts = np.hstack((right_line_window1, right_line_window2))
           
      # Draw the lane onto the warped blank image
-     cv2.fillPoly(window_img, np.int_([left_line_pts]), (0,255, 0))
-     cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
+     cv2.fillPoly(window_img, np.int64([left_line_pts]), (0,255, 0))
+     cv2.fillPoly(window_img, np.int64([right_line_pts]), (0,255, 0))
      result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
     
      # Plot the figures
@@ -399,7 +410,7 @@ class Lane:
 
 
    # Set the height of the sliding windows
-   window_height = np.int(self.warped_frame.shape[0]/self.no_of_windows)      
+   window_height = np.int32(self.warped_frame.shape[0]/self.no_of_windows)      
 
 
    # Find the x and y coordinates of all the nonzero
@@ -452,9 +463,9 @@ class Lane:
      # If you found > minpix pixels, recenter next window on mean position
      minpix = self.minpix
      if len(good_left_inds) > minpix:
-       leftx_current = np.int(np.mean(nonzerox[good_left_inds]))
+       leftx_current = np.int32(np.mean(nonzerox[good_left_inds]))
      if len(good_right_inds) > minpix:       
-       rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
+       rightx_current = np.int32(np.mean(nonzerox[good_right_inds]))
                   
    # Concatenate the arrays of indices
    left_lane_inds = np.concatenate(left_lane_inds)
@@ -621,7 +632,7 @@ class Lane:
    Return the x coordinate of the left histogram peak and the right histogram
    peak.
    """
-   midpoint = np.int(self.histogram.shape[0]/2)
+   midpoint = np.int32(self.histogram.shape[0]/2)
    leftx_base = np.argmax(self.histogram[:midpoint])
    rightx_base = np.argmax(self.histogram[midpoint:]) + midpoint
 
@@ -640,21 +651,16 @@ class Lane:
    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))      
       
    # Recast the x and y points into usable format for cv2.fillPoly()
-   pts_left = np.array([np.transpose(np.vstack([
-                        self.left_fitx, self.ploty]))])
-   pts_right = np.array([np.flipud(np.transpose(np.vstack([
-                         self.right_fitx, self.ploty])))])
+   pts_left = np.array([np.transpose(np.vstack([self.left_fitx, self.ploty]))])
+   pts_right = np.array([np.flipud(np.transpose(np.vstack([self.right_fitx, self.ploty])))])
    pts = np.hstack((pts_left, pts_right))
       
    # Draw lane on the warped blank image
-   cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
-
+   cv2.fillPoly(color_warp, np.int32([pts]), (255, 0, 0))
 
    # Warp the blank back to original image space using inverse perspective
    # matrix (Minv)
-   newwarp = cv2.warpPerspective(color_warp, self.inv_transformation_matrix, (
-                                 self.orig_frame.shape[
-                                 1], self.orig_frame.shape[0]))
+   newwarp = cv2.warpPerspective(color_warp, self.inv_transformation_matrix, (self.orig_frame.shape[1], self.orig_frame.shape[0]))
   
    # Combine the result with the original image
    result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.3, 0)
@@ -670,7 +676,6 @@ class Lane:
      ax1.set_title("Original Frame") 
      ax2.set_title("Original Frame With Lane Overlay")
      plt.show()  
-
 
    return result          
   
@@ -758,20 +763,19 @@ class Lane:
 def main():
 
 
- # Load a video
+#  # Load a video
  cap = cv2.VideoCapture(filename)
- fps = cap.get(cv2.CAP_PROP_FPS)
- frame_number = int(3 * fps)
+#  fps = cap.get(cv2.CAP_PROP_FPS)
+#  frame_number = int(3 * fps)
     
- cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
- ret, frame = cap.read()
- cv2.imshow("Frame", frame)
- cv2.waitKey(0)
+#  cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+#  ret, frame = cap.read()
+#  cv2.imshow("Frame", frame)
+#  cv2.waitKey(0)
 
  # Create a VideoWriter object so we can save the video output
  fourcc = cv2.VideoWriter_fourcc(*'mp4v')
  result = cv2.VideoWriter(output_filename, fourcc, output_frames_per_second, file_size)
- print("778 video processed")
  # Process the video
  while cap.isOpened():
       
@@ -780,7 +784,6 @@ def main():
       
    # Do we have a video frame? If true, proceed.
    if success:
-     print("line 787")
      # Resize the frame
      width = int(frame.shape[1] * scale_ratio)
      height = int(frame.shape[0] * scale_ratio)
@@ -848,8 +851,9 @@ def main():
       
    # No more video frames left
    else:
+     
      break
-          
+ print("No more video frames left")
  # Stop when the video is finished
  cap.release()
   

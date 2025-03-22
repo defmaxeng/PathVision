@@ -1,0 +1,6 @@
+matplotlib
+numpy
+googlemaps
+opencv-python
+geopy
+requests
