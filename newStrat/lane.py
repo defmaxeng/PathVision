@@ -95,7 +95,7 @@ class Lane:
       
    # Sliding window parameters
    self.no_of_windows = 10
-   self.margin = int((1/18) * width)  # Window width is +/- margin
+   self.margin = int((1/20) * width)  # Window width is +/- margin
    self.minpix = int((1/24) * width)  # Min no. of pixels to recenter window
       
    # Best fit polynomial lines for left line and right line of the lane
@@ -119,7 +119,7 @@ class Lane:
    self.left_curvem = None
    self.right_curvem = None
    self.center_offset = None
- def calculate_car_position(self, print_to_terminal=False, draw_on_frame=True):
+ def calculate_car_position(self, print_to_terminal=False, draw_on_frame=False):
    """
    Calculate the position of the car relative to the center
       
@@ -156,12 +156,20 @@ class Lane:
     x_vals = (self.right_fit[0] * y_vals**2 + self.right_fit[1] * y_vals + self.right_fit[2] + 
               self.left_fit[0] * y_vals**2 + self.left_fit[1] * y_vals + self.left_fit[2]) / 2  # Midpoint
 
+    x_left_vals = (self.left_fit[0] * y_vals**2 + self.left_fit[1] * y_vals + self.left_fit[2])
+    x_right_vals = (self.right_fit[0] * y_vals**2 + self.right_fit[1] * y_vals + self.right_fit[2])
+
+    
     # Convert points to integer format for OpenCV
     lane_points = np.column_stack((x_vals.astype(int), y_vals))
+    lane_points_left = np.column_stack((x_left_vals.astype(int), y_vals))
+    lane_points_right = np.column_stack((x_right_vals.astype(int), y_vals))
 
     # Draw the center lane line (blue) on the frame
     for i in range(1, len(lane_points)):
         cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
+        cv2.line(frame_copy, tuple(lane_points_left[i-1]), tuple(lane_points_left[i]), (0, 255, 0), thickness=3)
+        cv2.line(frame_copy, tuple(lane_points_right[i-1]), tuple(lane_points_right[i]), (0, 255, 0), thickness=3)
 
     self.orig_frame = frame_copy  # Update the frame with the overlay
     cv2.imshow("Frame with Center Lane Line", self.orig_frame)
@@ -355,7 +363,32 @@ class Lane:
    self.ploty = ploty
    self.left_fitx = left_fitx
    self.right_fitx = right_fitx
-      
+   height = self.orig_frame.shape[0]
+   
+   frame_copy = self.orig_frame.copy()  # Avoid modifying the original frame
+
+   # Define points for drawing the center lane line from bottom to top
+   y_vals = np.linspace(0, height - 1, num=height, dtype=int)  # All y-values from top to bottom
+   x_vals = (self.right_fit[0] * y_vals**2 + self.right_fit[1] * y_vals + self.right_fit[2] + 
+              self.left_fit[0] * y_vals**2 + self.left_fit[1] * y_vals + self.left_fit[2]) / 2  # Midpoint
+
+   x_left_vals = (self.left_fit[0] * y_vals**2 + self.left_fit[1] * y_vals + self.left_fit[2])
+   x_right_vals = (self.right_fit[0] * y_vals**2 + self.right_fit[1] * y_vals + self.right_fit[2])
+
+    
+    # Convert points to integer format for OpenCV
+   lane_points = np.column_stack((x_vals.astype(int), y_vals))
+   lane_points_left = np.column_stack((x_left_vals.astype(int), y_vals))
+   lane_points_right = np.column_stack((x_right_vals.astype(int), y_vals))
+
+   # Draw the center lane line (blue) on the frame
+   for i in range(1, len(lane_points)):
+       cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
+       cv2.line(frame_copy, tuple(lane_points_left[i-1]), tuple(lane_points_left[i]), (0, 255, 0), thickness=3)
+       cv2.line(frame_copy, tuple(lane_points_right[i-1]), tuple(lane_points_right[i]), (0, 255, 0), thickness=3)
+
+   self.orig_frame = frame_copy  # Update the frame with the overlay
+  #  cv2.imshow("Frame wi Line", self.orig_frame)
    if plot==True:
       
      # Generate images to draw on
@@ -394,7 +427,7 @@ class Lane:
      ax3.set_title("Warped Frame With Search Window")
      plt.show()
           
- def get_lane_line_indices_sliding_windows(self, plot=False):
+ def get_lane_line_indices_sliding_windows(self, plot=True):
    """
    Get the indices of the lane line pixels using the
    sliding windows technique.
@@ -739,7 +772,6 @@ class Lane:
    """
    if plot == False:
      return
-          
    if frame is None:
      frame = self.orig_frame.copy()
 
