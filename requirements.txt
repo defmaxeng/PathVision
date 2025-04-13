@@ -4,3 +4,4 @@ googlemaps
 opencv-python
 geopy
 requests
+nuscenes-devkit
