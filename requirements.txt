@@ -1,5 +1,5 @@
-matplotlib
-numpy
+matplotlib==3.5.0
+numpy==1.22.0
 googlemaps
 opencv-python
 geopy
