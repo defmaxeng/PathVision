@@ -72,10 +72,10 @@ class Lane:
    # Four corners of the trapezoid-shaped region of interest
    # You need to find these corners manually.
    self.roi_points = np.float32([
-     (int(0.456*width),int(0.544*height)), # Top-left corner
+     (int(0.456*width),int(0.584*height)), # Top-left corner
      (0, height-1), # Bottom-left corner          
      (int(0.958*width),height-1), # Bottom-right corner
-     (int(0.6183*width),int(0.544*height)) # Top-right corner
+     (int(0.5683*width),int(0.584*height)) # Top-right corner
    ])
       
    # The desired corner locations  of the region of interest
@@ -534,7 +534,7 @@ class Lane:
       
    left_fit = np.polyfit(lefty, leftx, 2)
    right_fit = np.polyfit(righty, rightx, 2)
-
+   
 
    # Add the latest polynomial coefficients       
    prev_left_fit.append(left_fit)
@@ -646,7 +646,7 @@ class Lane:
    # Lane lines should be pure in color and have high red channel values
    # Bitwise AND operation to reduce noise and black-out any pixels that
    # don't appear to be nice, pure, solid colors (like white or yellow lane
-   # lines.)      
+   # lines.)
    rs_binary = cv2.bitwise_and(s_binary, r_thresh)
 
 
@@ -654,7 +654,8 @@ class Lane:
    # If you show rs_binary visually, you'll see that it is not that different
    # from this return value. The edges of lane lines are thin lines of pixels.
    self.lane_line_markings = cv2.bitwise_or(rs_binary, sxbinary.astype(
-                             np.uint8))   
+                             np.uint8))
+   cv2.imshow("Lane Line Markings", self.lane_line_markings)   
    return self.lane_line_markings
       
  def histogram_peak(self):
@@ -668,6 +669,26 @@ class Lane:
    midpoint = np.int32(self.histogram.shape[0]/2)
    leftx_base = np.argmax(self.histogram[:midpoint])
    rightx_base = np.argmax(self.histogram[midpoint:]) + midpoint
+   print("Left x base: ", leftx_base)
+   print("Right x base: ", rightx_base)
+
+    # Get the actual peak values
+   left_peak_value = self.histogram[leftx_base]
+   right_peak_value = self.histogram[rightx_base]
+
+
+
+    # Check for ill-conditioned peaks
+   if left_peak_value < 5000:
+    print("Warning: Left polynomial fit may be ill conditioned (peak value < 5000)")
+   else:
+    print("Left polynomial fit is well conditioned (peak value > 5000)")
+
+   if right_peak_value < 5000:
+    print("Warning: Right polynomial fit may be ill conditioned (peak value < 5000)")
+   else:
+    print("Right polynomial fit is well conditioned (peak value > 5000)")
+
 
 
    # (x coordinate of left peak, x coordinate of right peak)
@@ -687,9 +708,9 @@ class Lane:
    pts_left = np.array([np.transpose(np.vstack([self.left_fitx, self.ploty]))])
    pts_right = np.array([np.flipud(np.transpose(np.vstack([self.right_fitx, self.ploty])))])
    pts = np.hstack((pts_left, pts_right))
-   
+
    # Draw lane on the warped blank image
-   cv2.fillPoly(color_warp, np.int32([pts]), (255, 15, 0))
+   cv2.fillPoly(color_warp, np.int32([pts]), (0, 125, 255))
 
    # Step 1: Compute midpoints between left and right x-points
    mid_x = (self.left_fitx + self.right_fitx) / 2
@@ -702,15 +723,24 @@ class Lane:
    for i in range(len(self.ploty)-1):
        pt1 = (int(central_fitx[i]), int(self.ploty[i]))
        pt2 = (int(central_fitx[i+1]), int(self.ploty[i+1]))
-       cv2.line(color_warp, pt1, pt2, (255, 0, 255), thickness=5)  # Purple center line
-       
-       
-       
+       cv2.line(color_warp, pt1, pt2, (255, 255, 255), thickness=5)  # Purple center line
+   height=self.orig_frame.shape[1]
+   width=self.orig_frame.shape[0] 
+   print("this happening?")    
+   self.roi_points = np.array([
+     (int(0.456*width),int(0.584*height)), # Top-left corner
+     (0, height-1), # Bottom-left corner          
+     (int(0.958*width),height-1), # Bottom-right corner
+     (int(self.right_fit[0]*int(height*0.584)**2) + int(self.right_fit[1]*int(height*0.584)) + int(self.right_fit[2]), int(0.584*height)) # Top-right corner  
+   ])
+   print(height)
+  
+   print(self.roi_points)
 
    # Warp the blank back to original image space using inverse perspective
    # matrix (Minv)
    newwarp = cv2.warpPerspective(color_warp, self.inv_transformation_matrix, (self.orig_frame.shape[1], self.orig_frame.shape[0]))
-   cv2.imshow("Central Line", newwarp)
+  #  cv2.imshow("Central Line", newwarp)
    cv2.waitKey(0)  # Display each line for a short time
    # Combine the result with the original image
    result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.3, 0)
@@ -811,12 +841,15 @@ class Lane:
   
 def main():
 
+ start_frame = 28
+
 
 #  # Load a video
  cap = cv2.VideoCapture(filename)
+ cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 #  fps = cap.get(cv2.CAP_PROP_FPS)
 #  frame_number = int(3 * fps)
-    
+ framenumber=0
 #  cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
 #  ret, frame = cap.read()
 #  cv2.imshow("Frame", frame)
@@ -833,6 +866,7 @@ def main():
       
    # Do we have a video frame? If true, proceed.
    if success:
+     print(framenumber)
      # Resize the frame
      width = int(frame.shape[1] * scale_ratio)
      height = int(frame.shape[0] * scale_ratio)
@@ -851,12 +885,11 @@ def main():
 
 
      # Plot the region of interest on the image
-     lane_obj.plot_roi(plot=False)
 
 
      # Perform the perspective transform to generate a bird's eye view
      # If Plot == True, show image with new region of interest
-     warped_frame = lane_obj.perspective_transform(plot=False)
+     warped_frame = lane_obj.perspective_transform(plot=True)
 
 
      # Generate the image histogram to serve as a starting point
@@ -885,7 +918,8 @@ def main():
      # Display curvature and center offset on image
      frame_with_lane_lines2 = lane_obj.display_curvature_offset(
        frame=frame_with_lane_lines, plot=False)
-              
+     lane_obj.plot_roi(plot=True)
+         
      # Write the frame to the output video file
      result.write(frame_with_lane_lines2)
           
@@ -897,7 +931,7 @@ def main():
      # q == quit
      if cv2.waitKey(25) & 0xFF == ord('q'):
        break
-      
+     framenumber += 1
    # No more video frames left
    else:
      
