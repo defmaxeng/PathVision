@@ -61,7 +61,7 @@ def locate_important_edges(canny_image):
         if regression_params is not None:
             right_regressions.append(regression_params)
     
-    visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
+    #visualize_slopes_and_lines(canny_image, left_regressions, right_regressions, 10)
 
     regression_image = cv2.cvtColor(extreme_image, cv2.COLOR_GRAY2BGR)
 

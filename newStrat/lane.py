@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt # Used for plotting and error checking
 
 
 # Make sure the video file is in the same directory as your code
-filename = '../images/njHighwayLossy.mp4'
+filename = 'images/lane_video.mp4'
 file_size = (1920,1080) # Assumes 1920x1080 mp4
 scale_ratio = 1 # Option to scale to fraction of original size.
 
@@ -167,7 +167,7 @@ class Lane:
 
     # Draw the center lane line (blue) on the frame
     for i in range(1, len(lane_points)):
-        cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
+        cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 255, 255), thickness=3)
         cv2.line(frame_copy, tuple(lane_points_left[i-1]), tuple(lane_points_left[i]), (0, 255, 0), thickness=3)
         cv2.line(frame_copy, tuple(lane_points_right[i-1]), tuple(lane_points_right[i]), (0, 255, 0), thickness=3)
 
@@ -381,11 +381,11 @@ class Lane:
    lane_points_left = np.column_stack((x_left_vals.astype(int), y_vals))
    lane_points_right = np.column_stack((x_right_vals.astype(int), y_vals))
 
-   # Draw the center lane line (blue) on the frame
-   for i in range(1, len(lane_points)):
-       cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
-       cv2.line(frame_copy, tuple(lane_points_left[i-1]), tuple(lane_points_left[i]), (0, 255, 0), thickness=3)
-       cv2.line(frame_copy, tuple(lane_points_right[i-1]), tuple(lane_points_right[i]), (0, 255, 0), thickness=3)
+  #  # Draw the center lane line (blue) on the frame
+  #  for i in range(1, len(lane_points)):
+  #      cv2.line(frame_copy, tuple(lane_points[i - 1]), tuple(lane_points[i]), (0, 0, 255), thickness=3)
+  #      cv2.line(frame_copy, tuple(lane_points_left[i-1]), tuple(lane_points_left[i]), (0, 255, 0), thickness=3)
+  #      cv2.line(frame_copy, tuple(lane_points_right[i-1]), tuple(lane_points_right[i]), (0, 255, 0), thickness=3)
 
    self.orig_frame = frame_copy  # Update the frame with the overlay
   #  cv2.imshow("Frame wi Line", self.orig_frame)
@@ -687,14 +687,31 @@ class Lane:
    pts_left = np.array([np.transpose(np.vstack([self.left_fitx, self.ploty]))])
    pts_right = np.array([np.flipud(np.transpose(np.vstack([self.right_fitx, self.ploty])))])
    pts = np.hstack((pts_left, pts_right))
-      
+   
    # Draw lane on the warped blank image
-   cv2.fillPoly(color_warp, np.int32([pts]), (255, 0, 0))
+   cv2.fillPoly(color_warp, np.int32([pts]), (255, 15, 0))
+
+   # Step 1: Compute midpoints between left and right x-points
+   mid_x = (self.left_fitx + self.right_fitx) / 2
+
+   # Step 2: Fit a degree-2 polynomial to the midpoints
+   central_fit = np.polyfit(self.ploty, mid_x, 2)
+   central_fitx = central_fit[0]*self.ploty**2 + central_fit[1]*self.ploty + central_fit[2]
+
+   # Step 3: Draw the central polynomial line on the color_warp image
+   for i in range(len(self.ploty)-1):
+       pt1 = (int(central_fitx[i]), int(self.ploty[i]))
+       pt2 = (int(central_fitx[i+1]), int(self.ploty[i+1]))
+       cv2.line(color_warp, pt1, pt2, (255, 0, 255), thickness=5)  # Purple center line
+       
+       
+       
 
    # Warp the blank back to original image space using inverse perspective
    # matrix (Minv)
    newwarp = cv2.warpPerspective(color_warp, self.inv_transformation_matrix, (self.orig_frame.shape[1], self.orig_frame.shape[0]))
-  
+   cv2.imshow("Central Line", newwarp)
+   cv2.waitKey(0)  # Display each line for a short time
    # Combine the result with the original image
    result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.3, 0)
       

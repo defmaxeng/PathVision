@@ -1,10 +1,11 @@
 from nuscenes.nuscenes import NuScenes
 
-# Set the dataset directory
-dataset_directory = "/path/to/your/nuscenes/dataset"
+# # Set the dataset directory
 
-# Initialize NuScenes object
-nusc = NuScenes(version='v1.0-mini', dataroot=dataset_directory, verbose=True)
+# dataset_directory = "v1.0-mini"
 
-# Print out information on the dataset
-print("Available sample data:", len(nusc.sample))
+# # Initialize NuScenes object
+# nusc = NuScenes(version='v1.0-mini', dataroot=dataset_directory, verbose=True)
+
+# # Print out  information on the dataset
+# print("Available sample data:", len(nusc.sample))
