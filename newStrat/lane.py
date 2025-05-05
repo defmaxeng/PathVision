@@ -724,8 +724,8 @@ class Lane:
        pt1 = (int(central_fitx[i]), int(self.ploty[i]))
        pt2 = (int(central_fitx[i+1]), int(self.ploty[i+1]))
        cv2.line(color_warp, pt1, pt2, (255, 255, 255), thickness=5)  # Purple center line
-   height=self.orig_frame.shape[1]
-   width=self.orig_frame.shape[0] 
+   height=self.orig_frame.shape[0]
+   width=self.orig_frame.shape[1] 
    print("this happening?")    
    self.roi_points = np.array([
      (int(0.456*width),int(0.584*height)), # Top-left corner
@@ -733,9 +733,10 @@ class Lane:
      (int(0.958*width),height-1), # Bottom-right corner
      (int(self.right_fit[0]*int(height*0.584)**2) + int(self.right_fit[1]*int(height*0.584)) + int(self.right_fit[2]), int(0.584*height)) # Top-right corner  
    ])
+  #  int(self.right_fit[0]*int(height*0.584)**2) + int(self.right_fit[1]*int(height*0.584)) + int(self.right_fit[2])
    print(height)
-  
    print(self.roi_points)
+  
 
    # Warp the blank back to original image space using inverse perspective
    # matrix (Minv)
@@ -826,12 +827,13 @@ class Lane:
    # Overlay trapezoid on the frame
    this_image = cv2.polylines(frame, np.int32([
      self.roi_points]), True, (147,20,255), 3)
-
+   print(self.roi_points)
 
    # Display the image
    while(1):
      cv2.imshow('ROI Image', this_image)
-          
+     cv2.setMouseCallback('ROI Image', show_coordinates)
+     
      # Press any key to stop
      if cv2.waitKey(0):
        break
@@ -839,9 +841,16 @@ class Lane:
 
    cv2.destroyAllWindows()
   
+
+
+def show_coordinates(event, x, y, flags, param):
+    if event == cv2.EVENT_MOUSEMOVE:
+        print(f"Mouse at: ({x}, {y})")
+
 def main():
 
  start_frame = 28
+
 
 
 #  # Load a video
