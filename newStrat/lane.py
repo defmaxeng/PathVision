@@ -684,10 +684,10 @@ class Lane:
    else:
     print("Left polynomial fit is well conditioned (peak value > 5000)")
 
-   if right_peak_value < 5000:
-    print("Warning: Right polynomial fit may be ill conditioned (peak value < 5000)")
+   if right_peak_value < 8000:
+    print("Warning: Right polynomial fit might be be ill conditioned (kinda cooked lowkey) (peak value < 8000)")
+    rightx_base = leftx_base + midpoint * 2 # Shift the right peak to the right by 1000 pixels
    else:
-    print("Right polynomial fit is well conditioned (peak value > 5000)")
 
 
 
@@ -726,16 +726,19 @@ class Lane:
        cv2.line(color_warp, pt1, pt2, (255, 255, 255), thickness=5)  # Purple center line
    height=self.orig_frame.shape[0]
    width=self.orig_frame.shape[1] 
-   print("this happening?")    
+   unwarped_right_fit = unwarp_quadratic_fit(self.right_fit, self.inv_transformation_matrix, self.orig_frame.shape)
+   unwarped_left_fit = unwarp_quadratic_fit(self.left_fit, self.inv_transformation_matrix, self.orig_frame.shape)
+  
    self.roi_points = np.array([
-     (int(0.456*width),int(0.584*height)), # Top-left corner
+     (int(unwarped_left_fit[0]*int(height*0.59)**2) + int(unwarped_left_fit[1]*int(height*0.59)) + int(unwarped_left_fit[2])-20,int(0.59*height)), # Top-left corner
      (0, height-1), # Bottom-left corner          
      (int(0.958*width),height-1), # Bottom-right corner
-     (int(self.right_fit[0]*int(height*0.584)**2) + int(self.right_fit[1]*int(height*0.584)) + int(self.right_fit[2]), int(0.584*height)) # Top-right corner  
+     (int(unwarped_right_fit[0]*int(height*0.59)**2) + int(unwarped_right_fit[1]*int(height*0.59)) + int(unwarped_right_fit[2])+20, int(0.59*height)) # Top-right corner  
    ])
+  
   #  int(self.right_fit[0]*int(height*0.584)**2) + int(self.right_fit[1]*int(height*0.584)) + int(self.right_fit[2])
-   print(height)
-   print(self.roi_points)
+  #  print(height)
+  #  print(self.roi_points)
   
 
    # Warp the blank back to original image space using inverse perspective
@@ -827,12 +830,12 @@ class Lane:
    # Overlay trapezoid on the frame
    this_image = cv2.polylines(frame, np.int32([
      self.roi_points]), True, (147,20,255), 3)
-   print(self.roi_points)
+  #  print(self.roi_points)
 
    # Display the image
    while(1):
      cv2.imshow('ROI Image', this_image)
-     cv2.setMouseCallback('ROI Image', show_coordinates)
+    #  cv2.setMouseCallback('ROI Image', show_coordinates)
      
      # Press any key to stop
      if cv2.waitKey(0):
@@ -847,9 +850,45 @@ def show_coordinates(event, x, y, flags, param):
     if event == cv2.EVENT_MOUSEMOVE:
         print(f"Mouse at: ({x}, {y})")
 
+
+def unwarp_quadratic_fit(right_fit, inv_matrix, image_shape):
+    """
+    Given a quadratic fit in warped space, unwarp it to original image space.
+
+    Args:
+        right_fit (ndarray): Quadratic coefficients [A, B, C] such that x = Ay^2 + By + C.
+        inv_matrix (ndarray): 3x3 inverse perspective transform matrix.
+        image_shape (tuple): Shape of the original image (height, width).
+
+    Returns:
+        new_fit (ndarray): Unwarped quadratic coefficients [A, B, C] such that x = Ay^2 + By + C in original space.
+    """
+    height = image_shape[0]
+
+    # Step 1: Sample y-values
+    ploty = np.linspace(0, height - 1, num=height)
+
+    # Step 2: Evaluate x for each y in warped space
+    fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+    # Step 3: Stack x and y into (N, 1, 2) array
+    warped_points = np.vstack((fitx, ploty)).T.reshape(-1, 1, 2)
+
+    # Step 4: Apply inverse perspective transform
+    unwarped_points = cv2.perspectiveTransform(warped_points.astype(np.float32), inv_matrix)
+
+    # Step 5: Extract x and y from unwarped points
+    unwarped_x = unwarped_points[:, 0, 0]
+    unwarped_y = unwarped_points[:, 0, 1]
+
+    # Step 6: Fit a new quadratic: x = A*y^2 + B*y + C
+    new_fit = np.polyfit(unwarped_y, unwarped_x, 2)
+
+    return new_fit
+
 def main():
 
- start_frame = 28
+ start_frame = 130
 
 
 
