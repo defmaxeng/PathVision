@@ -1,0 +1,54 @@
+
+Goal Recap:
+Use GPS/map data (like Google Maps or OpenStreetMap) to generate a route path, then align and overlay that path into the camera view as if it's painted on the road.
+
+Strategy to Integrate Mapping API
+
+1. Decide the Type of GPS Data You Want
+You need the planned route geometry:
+- List of GPS coordinates (lat, lon) along a driving path.
+- Optional: road curvature, heading, lane info (harder).
+
+Options:
+- Google Maps Directions API (paid): gives you the step-by-step path.
+- OpenStreetMap + OSRM (free and customizable): open-source routing engine that gives route coordinates.
+- Mapbox Directions API (hybrid of Google and OSM): has good docs and is more affordable than Google.
+
+2. Extract the Route Geometry
+Once you get the path:
+- Save it as a list of (lat, lon) points.
+- Optionally enrich it with heading, step instructions, and curvature.
+- You’ll want a high-resolution polyline to draw smooth paths.
+
+3. Convert GPS Coordinates to Your Camera's Perspective
+You need to bring the GPS world into your camera world.
+
+Step-by-step:
+- Get camera's real-time GPS location (from phone, device, or test data).
+- Convert all GPS waypoints into local coordinates (e.g., using UTM or haversine-based projection).
+- Use a perspective transform to map these to image pixels using your lane detection’s homography matrix.
+- These become your overlay path.
+
+4. Simulate and Test
+Before real road tests:
+- Use pre-recorded dashcam footage and simulate GPS path.
+- Load video and mock route coordinates for that road.
+- Test how well they align visually.
+
+Test Datasets:
+- Apolloscape or Argoverse: includes video + GPS + LiDAR.
+- KITTI: classic dataset with camera + GPS/IMU, but fewer lane markings.
+- BDD100K: driving video dataset with GPS and various road scenarios.
+
+5. Visual Overlay
+Use OpenCV to:
+- Draw polyline for GPS path (after projection).
+- Use arrow markers or custom graphics.
+- Blend it onto the lane-detected image.
+
+6. Optional: Live Setup
+For a live prototype:
+- Connect a phone or USB GPS module.
+- Run a route query (e.g., Google Maps or OSRM).
+- Continuously update path overlay as you move and process video.
+

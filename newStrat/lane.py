@@ -688,6 +688,7 @@ class Lane:
     print("Warning: Right polynomial fit might be be ill conditioned (kinda cooked lowkey) (peak value < 8000)")
     rightx_base = leftx_base + midpoint * 2 # Shift the right peak to the right by 1000 pixels
    else:
+    print("Right polynomial fit is well conditioned (peak value > 8000)")
 
 
 
