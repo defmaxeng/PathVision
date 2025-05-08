@@ -1,3 +1,12 @@
+Before OpenStreetMap:
+Attempt to successfully download NUScenes.
+
+Roadmap
+ - get the camera to recognize turns, adjacent lanes, more scenarios generally
+ Download NuScenes, try to get the program to work on it, integrating OpenStreetMap as needed.
+
+
+
 
 Goal Recap:
 Use GPS/map data (like Google Maps or OpenStreetMap) to generate a route path, then align and overlay that path into the camera view as if it's painted on the road.
@@ -9,10 +18,7 @@ You need the planned route geometry:
 - List of GPS coordinates (lat, lon) along a driving path.
 - Optional: road curvature, heading, lane info (harder).
 
-Options:
-- Google Maps Directions API (paid): gives you the step-by-step path.
 - OpenStreetMap + OSRM (free and customizable): open-source routing engine that gives route coordinates.
-- Mapbox Directions API (hybrid of Google and OSM): has good docs and is more affordable than Google.
 
 2. Extract the Route Geometry
 Once you get the path:
@@ -51,4 +57,5 @@ For a live prototype:
 - Connect a phone or USB GPS module.
 - Run a route query (e.g., Google Maps or OSRM).
 - Continuously update path overlay as you move and process video.
+
 
