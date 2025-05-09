@@ -16,3 +16,6 @@ opencv-python
 geopy
 requests
 nuscenes-devkit
+osmnx
+geopandas
+networkx
