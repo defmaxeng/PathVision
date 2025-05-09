@@ -1,11 +1,13 @@
 from nuscenes.nuscenes import NuScenes
+import os
+import cv2
 
-# # Set the dataset directory
-
-# dataset_directory = "v1.0-mini"
-
-# # Initialize NuScenes object
-# nusc = NuScenes(version='v1.0-mini', dataroot=dataset_directory, verbose=True)
-
-# # Print out  information on the dataset
-# print("Available sample data:", len(nusc.sample))
+nusc = NuScenes(version='v1.0-mini', dataroot='C:\\Users\\maxen\\OneDrive\\Documents\\GitHub\\PathVision\\v1.0-mini', verbose=True)
+sample = nusc.sample[0] 
+cam_data_token = sample['data']['CAM_FRONT']
+cam_data = nusc.get('sample_data', cam_data_token)
+image_path = os.path.join(nusc.dataroot, cam_data['filename'])
+img = cv2.imread(image_path)
+cv2.imshow('Front Camera', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
