@@ -5,6 +5,16 @@ import cv2
 import json
 import numpy as np
 from torchvision import transforms
+import argparse
+
+
+# Base directory is the folder that holds the model folders generated in this program
+parser = argparse.ArgumentParser()
+parser.add_argument("--modelpath", type=str, default=None)
+parser.add_argument("--imagepath", type=str, default=None)
+parser.add_argument("--jsonpath", type=str, default=None)
+parser.add_argument("--imgrelpath", type=str, default=None)
+args = parser.parse_args()
 
 
 # ========== Model Definition ==========
@@ -32,7 +42,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
 model = ConvNet()
-model_path = "saved_models/model-1/epoch-149_avgLoss=246.70/image-2800.pth"  # change to match your model folder
+model_path = args.modelpath  # change to match your model folder
+# "saved_models/learning_rates_test_0.5-20/model-4/weights.pth"
 model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
 model.to(device)
 model.eval()
@@ -40,8 +51,10 @@ print("Model loaded successfully ✅")
 
 
 # ========== Load Test Image ==========
-image_path = "images/256x144/clips/0313-2/7560/20.jpg"  # change if needed
+image_path = args.imagepath  # change if needed
+# "images/256x144/clips/0313-2/7560/20.jpg"
 image = cv2.imread(image_path)
+print("recieved image: ", image_path)
 if image is None:
     raise FileNotFoundError(f"Image not found: {image_path}")
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -53,11 +66,12 @@ transform = transforms.Compose([
 image_tensor = transform(image).unsqueeze(0).to(device)  # shape: (1, 3, 144, 256)
 
 # ========== Load h_samples ==========
-json_path = "images/256x144/label_data_0313_256x144.json"
+json_path = args.jsonpath
+# "images/256x144/label_data_0313_256x144.json"
 with open(json_path, 'r') as f:
     for line in f:
         data = json.loads(line)
-        if data["raw_file"] == "clips/0313-2/7560/20.jpg":
+        if data["raw_file"] == args.imgrelpath:
             h_samples = data["h_samples"]
             break
     else:

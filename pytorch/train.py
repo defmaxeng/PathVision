@@ -5,6 +5,24 @@ from torchvision import datasets, transforms
 import cv2
 import json
 import os
+import argparse
+
+
+# Base directory is the folder that holds the model folders generated in this program
+parser = argparse.ArgumentParser()
+parser.add_argument("--base_dir", type=str, default=None)
+parser.add_argument("--width", type=int, default=None)
+parser.add_argument("--height", type=int, default=None)
+parser.add_argument("--json_path", type=str, default=None)
+parser.add_argument("--epochs", type=int, default=10)
+parser.add_argument("--lr", type=float, default=0.001)
+parser.add_argument("--config", type=str, default=None)
+
+args = parser.parse_args()
+if args.width is None or args.height is None:
+    raise ValueError("Both --width and --height must be provided.")
+
+
 
 print("CUDA available:", torch.cuda.is_available())
 print("GPU name:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU detected")
@@ -19,7 +37,7 @@ def get_next_model_dir(base_dir, prefix="model-"):
         full_path = os.path.join(base_dir, folder_name)
         if not os.path.exists(full_path):
             os.makedirs(full_path)
-
+            print("made new model folder: ", full_path)
             return full_path  # e.g., 'saved_models/model-3'
         i += 1
 
@@ -97,6 +115,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
 
+def reinitialize_model():
+    new_model = ConvNet().to(device)
+    new_optimizer = torch.optim.SGD(new_model.parameters(), lr=args.lr)
+    return new_model, new_optimizer
 
 
 #################################################################
@@ -180,16 +202,32 @@ def train(model, json_file_path, criterion, optimizer, epochs):
             total_loss += loss.item()
             total += 1
 
-        print(f"Epoch {epoch} done: Avg Loss = {total_loss / total:.4f}")
-        # Round and format loss
-        formatted_loss = f"{total_loss / total:.2f}"
+                    if (idx + 1) % print_every == 0:
+                        with torch.no_grad():
+                            diffs = torch.abs(outputs - lanes_tensor.unsqueeze(0))
+                            correct = ((diffs < threshold) * mask.unsqueeze(0)).sum()
+                            total_masked = mask.sum()
+                            acc = 100 * correct / total_masked if total_masked > 0 else 0
+                        print(f"[Epoch {epoch}] Image {idx+1}: Loss = {loss.item():.4f}, Accuracy = {acc:.2f}%")
 
-        # New folder name with loss
-        new_model_dir = f"{model_dir}/epoch-{epoch}_avgLoss={formatted_loss}"
+                if nan_detected:
+                    break  # break out of epoch loop and restart
 
-        # Rename the folder
-        os.rename(f"{model_dir}/epoch-{epoch}", new_model_dir)
-        print(f"📦 Renamed model folder to: {new_model_dir}")
+                if total > 0:
+                    avg_loss = total_loss / total
+                    print(f"Epoch {epoch} done: Avg Loss = {avg_loss:.4f}")
+                    f.write(f"Epoch {epoch} Avg Loss = {avg_loss:.4f}\n")
+                else:
+                    print(f"Epoch {epoch} skipped: no valid images")
+                    f.write(f"Epoch {epoch} skipped: no valid images\n")
+
+        if nan_detected:
+            model, optimizer = reinitialize_model()
+            continue  # restart training
+        else:
+            torch.save(model.state_dict(), f'{model_dir}/weights.pth')
+            break  # training finished successfully
+
         
 
 

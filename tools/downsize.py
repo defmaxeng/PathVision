@@ -6,8 +6,8 @@ from PIL import Image
 json_file = "archive/TUSimple/train_set/label_data_0313.json"             # Path to your JSON file
 
 image_root = "archive/TUSimple/train_set"               # Folder that contains 'clips/'
-output_root = "256x144"                        # Output folder for resized images
-output_json = f"{output_root}/label_data_0313_{output_root}.json"
+output_root = "images/256x144"                        # Output folder for resized images
+output_json = f"{output_root}/label_data_0313_256x144.json"
 
 # Make sure output folder exists
 os.makedirs(output_root, exist_ok=True)

@@ -1,2 +1,31 @@
+# Directories
 images/
 archive/
+
+# Model weights and checkpoints
+*.pth
+*.ckpt
+*.safetensors
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+.env
+venv/
+env/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Common ML/data files
+*.csv
+*.json
+data/
+datasets/
+
+# IDE files
+.vscode/
+.idea/
+saved_models/
+
+*.png
