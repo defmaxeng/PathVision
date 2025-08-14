@@ -1,18 +1,20 @@
 import subprocess
 import numpy as np
 import os
+import shutil
 
 # Fixed arguments
-base_dir = "saved_models/cannyAttempt"
+base_dir = "saved_models/test_nan"
 os.makedirs(base_dir, exist_ok=True)
+shutil.copy(os.path.abspath(__file__), os.path.abspath(base_dir))
 width = 256
 height = 144
 json_path = "images/256x144/label_data_0313_256x144.json"  # even if ignored, you gotta pass something since it's in args
-epochs = 30
+epochs = 1
 config = "configA"
 
 # Learning rates to test
-lrs = np.linspace(0.05, 20, num=15)  # 10 values from 0.005 to 0.1
+lrs = np.linspace(5, 20, num=5)  # 10 values from 0.005 to 0.1
 
 for i, lr in enumerate(lrs, 1):
     print(f"▶️ Starting training #{i} with learning rate {lr:.5f}")
