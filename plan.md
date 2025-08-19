@@ -1,5 +1,17 @@
 # Planning File
 
+## August 17th, 2025
+Attempting to fix the pth file
+
+* the pth file was totally okay, it was just saving as a dictionary of dictionaries which I did not realize. I thought it was just a single dictionary.
+* However the visualization is still completely off for some reason.
+
+
+## August 16th, 2025
+Implemented residual neural networks, and fixed the folder creation system.
+
+Actually running the neural network isn't working since the pth file might be improperly constructed.
+
 
 ## August 8th, 2025
 Today I am going to attempt residual networks.

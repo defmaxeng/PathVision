@@ -65,8 +65,11 @@ def masked_mse_loss(pred, target, mask):
     pred:   (B, L, H)  predicted x-positions
     target: (B, L, H)  ground-truth x-positions (dummy where mask==0)
     mask:   (B, L, H)  1 where valid label, 0 where missing (-2 in JSON)
-    """
+    """ 
+    # print("Predicted shape: ", pred.size())
+    # print("Target Shape: ", target.size())
     diff2 = (pred - target) ** 2 * mask
+   
     return diff2.sum() / mask.sum().clamp(min=1)
 
 class MaskedMSELoss(nn.Module):
@@ -79,7 +82,7 @@ class MaskedMSELoss(nn.Module):
 
 ################################################################
 # Training Setup
-model = ConvNet(256, 144)
+model = ConvNet(4, 48)
 criterion = MaskedMSELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
@@ -98,7 +101,7 @@ import shutil
 
 def reinitialize_model():
     print("reinitializing model...")
-    new_model = ConvNet(256, 144).to(device)
+    new_model = ConvNet(4, 48).to(device)
     
     highest_model_index = 2
     while os.path.exists(f"{base_dir}/model-{highest_model_index}"):
@@ -158,7 +161,7 @@ def train(model, json_file_path, criterion, optimizer, epochs):
 
                 lanes_tensor = lanes_tensor.to(device)
                 mask = mask.to(device)
-
+                # print("image tensor shape: ", image_tensor.size())
                 outputs = model(image_tensor)
                 loss = criterion(outputs, lanes_tensor.unsqueeze(0), mask.unsqueeze(0))
 
@@ -187,7 +190,6 @@ def train(model, json_file_path, criterion, optimizer, epochs):
                         acc = 100 * correct / total_masked if total_masked > 0 else 0
                     log_line = f"[Epoch {epoch}] Image {idx+1}: Loss = {loss.item():.4f}, Accuracy = {acc:.2f}%"
                     print(log_line)
-                    f.write(log_line + "\n")
 
             
 

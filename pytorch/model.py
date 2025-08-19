@@ -1,22 +1,26 @@
-# model.py
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from torchvision.models import resnet18, ResNet18_Weights
 
 class ConvNet(nn.Module):
-    def __init__(self, width, height):
+    def __init__(self, out_cols=4, out_rows=48, pretrained=True):
+        """
+        out_cols: numba of lane channels (4)
+        out_rows: numba of samples per lane (48)
+        """
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(int(32 * width * height / 16), 4 * 48)
+        weights = ResNet18_Weights.DEFAULT if pretrained else None
+        self.backbone = resnet18(weights=weights)  # first conv already 3->64
+        in_feats = self.backbone.fc.in_features     # 512
+        # Replace the classifier head to match 4*48 outputs
+        self.backbone.fc = nn.Linear(in_feats, out_cols * out_rows)
+        self.out_cols = out_cols
+        self.out_rows = out_rows
+        
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = self.pool(x)
-        x = F.relu(self.conv2(x))
-        x = self.pool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = x.view(-1, 4, 48)
+        
+        x = self.backbone(x)                        # (B, out_cols*out_rows)
+        x = x.view(x.size(0), self.out_cols, self.out_rows)  # (B, 4, 48)
+        
         return x
