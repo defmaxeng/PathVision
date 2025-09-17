@@ -1,6 +1,7 @@
 # Directories
 images/
 archive/
+tools/
 
 # Model weights and checkpoints
 *.pth
@@ -29,4 +30,3 @@ datasets/
 saved_models/
 
 *.png
-
