@@ -13,7 +13,7 @@ base_dir = args.base_dir # got the base directory
 # Define Variables
 model = ResNet18(4, 48)
 learning_rate = 0.001
-epochs = 50
+epochs = 10
 resolution = "256x144"
 criterion = MaskedMSELoss()
 optimizer = torch.optim.SGD(model.parameters(), learning_rate)

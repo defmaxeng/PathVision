@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 
 src = Path("template")
-dst = Path("models/first_attempt")
+dst = Path("models/does_this_even_work")
 
 # make sure parent dirs exist
 dst.parent.mkdir(parents=True, exist_ok=True)

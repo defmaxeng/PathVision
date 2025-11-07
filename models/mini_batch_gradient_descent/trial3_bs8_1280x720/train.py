@@ -112,7 +112,7 @@ def mbgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_d
             for index, json_line in enumerate(lines):
                 # Load in the raw image and lanes
                 loaded_line = json.loads(json_line)
-                raw_image_path = f"images/{resolution}/{loaded_line['raw_file']}"
+                raw_image_path = f"datasets/archive/TUSimple/train_set/{loaded_line['raw_file']}"
                 lanes = loaded_line["lanes"]
 
                 # Append image, label_lanes, and mask to lists for batch creation
@@ -148,11 +148,11 @@ def mbgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_d
                     raw_image_path_list = []
 
                     # c. Run the network
-                    optimizer.zero_grad(set_to_none=True)                                           # 1. Clear the Gradient
-                    outputs = model(input_batch_tensor)                                             # 2. For-Prop
-                    loss = criterion(outputs, lanes_label_batch_tensor, mask_batch_tensor)          # 3. Calculate Loss
-                    loss.backward()                                                                 # 4. Back-Prop
-                    optimizer.step()                                                                # 5. Gradient Descent
+                    optimizer.zero_grad(set_to_none=True)                          # 1. Clear the Gradient
+                    outputs = model(input_batch_tensor)                            # 2. For-Prop
+                    loss = criterion(outputs, lanes_label_batch_tensor, mask_batch_tensor)           # 3. Calculate Loss
+                    loss.backward()                                                # 4. Back-Prop
+                    optimizer.step()                                               # 5. Gradient Descent
 
                 
                     # d. Print out loss
@@ -174,10 +174,4 @@ def mbgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_d
                 'optimizer_state_dict': optimizer.state_dict(),
                 
             }, f"{base_dir}/weights.pth")
-
-
-
-
-
-
 

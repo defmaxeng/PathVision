@@ -1,5 +1,10 @@
 # Planning File
 
+
+## November 5th, 2025
+Want to access the comma ai dataset, and then analyze the video frame by frame, overlaying my ai predictions onto each part.
+
+
 ## August 17th, 2025
 Attempting to fix the pth file
 

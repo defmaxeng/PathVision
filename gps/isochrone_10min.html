@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_bf84c31b2a0734f1e231f24b52c388d6 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_bf84c31b2a0734f1e231f24b52c388d6" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_bf84c31b2a0734f1e231f24b52c388d6 = L.map(
+                "map_bf84c31b2a0734f1e231f24b52c388d6",
+                {
+                    center: [40.415363, -3.707398],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 15,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_8b977f93af2c338a54a744e4c3079de6 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_8b977f93af2c338a54a744e4c3079de6.addTo(map_bf84c31b2a0734f1e231f24b52c388d6);
+        
+    
+
+        function geo_json_7d63e7b0387223862289282ae86025f1_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_7d63e7b0387223862289282ae86025f1 = L.geoJson(null, {
+                onEachFeature: geo_json_7d63e7b0387223862289282ae86025f1_onEachFeature,
+            
+            ...{
+}
+        });
+
+        function geo_json_7d63e7b0387223862289282ae86025f1_add (data) {
+            geo_json_7d63e7b0387223862289282ae86025f1
+                .addData(data);
+        }
+            geo_json_7d63e7b0387223862289282ae86025f1_add({"bbox": [-3.714853, 40.40819, -3.699175, 40.421507], "features": [{"geometry": {"coordinates": [[[-3.714853, 40.414893], [-3.714728, 40.413782], [-3.713058, 40.410746], [-3.710943, 40.409016], [-3.71042, 40.408599], [-3.710287, 40.408538], [-3.707516, 40.408214], [-3.707157, 40.40819], [-3.705308, 40.408477], [-3.705173, 40.408526], [-3.702211, 40.410054], [-3.700755, 40.412179], [-3.699186, 40.416397], [-3.699175, 40.416757], [-3.699359, 40.417512], [-3.699593, 40.418016], [-3.700028, 40.418636], [-3.701634, 40.419694], [-3.702961, 40.420388], [-3.705248, 40.421446], [-3.705455, 40.421507], [-3.708238, 40.421257], [-3.708893, 40.421011], [-3.709227, 40.420876], [-3.711696, 40.419732], [-3.711768, 40.419688], [-3.712989, 40.418412], [-3.713451, 40.417792], [-3.71483, 40.415253], [-3.714853, 40.414893]]], "type": "Polygon"}, "properties": {"area": 1449687.87, "center": [-3.707380984945524, 40.41516105571337], "group_index": 0, "reachfactor": 1.0, "value": 600.0}, "type": "Feature"}], "metadata": {"attribution": "openrouteservice.org | OpenStreetMap contributors", "engine": {"build_date": "2025-06-06T15:39:25Z", "graph_date": "2025-10-30T00:32:48Z", "osm_date": "2025-10-20T00:00:01Z", "version": "9.3.0"}, "query": {"attributes": ["area", "reachfactor"], "locations": [[-3.707398, 40.415363]], "profile": "foot-walking", "profileName": "foot-walking", "range": [600.0], "range_type": "time"}, "service": "isochrones", "timestamp": 1762206053952}, "type": "FeatureCollection"});
+        geo_json_7d63e7b0387223862289282ae86025f1.setStyle(function(feature) {return feature.properties.style;});
+
+        
+    
+            geo_json_7d63e7b0387223862289282ae86025f1.addTo(map_bf84c31b2a0734f1e231f24b52c388d6);
+        
+    
+            var marker_e5281934bf2e4c0c90af8c76a9deb3dc = L.marker(
+                [40.415363, -3.707398],
+                {
+}
+            ).addTo(map_bf84c31b2a0734f1e231f24b52c388d6);
+        
+    
+            marker_e5281934bf2e4c0c90af8c76a9deb3dc.bindTooltip(
+                `<div>
+                     Center
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>

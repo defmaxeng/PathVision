@@ -22,6 +22,7 @@ class ResNet18(nn.Module):
 
 
     def forward(self, x):
+        # input has shape: (B, 3, H, W)
 
         # Passes through the 18 layer Resnet Backbone
         x = self.backbone(x)                        # (B, out_cols*out_rows)

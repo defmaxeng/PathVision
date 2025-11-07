@@ -12,13 +12,13 @@ base_dir = args.base_dir # got the base directory
 
 # Define Variables
 model = ResNet18(4, 48)
-learning_rate = 0.001
-epochs = 50
+learning_rate = 0.002
+epochs = 100
 resolution = "256x144"
 criterion = MaskedMSELoss()
 optimizer = torch.optim.SGD(model.parameters(), learning_rate)
 print_every = 50
-batch_size = 16
+batch_size = 8
 
 # Files
 json_file_path = "images/256x144/label_data_0313_256x144.json"

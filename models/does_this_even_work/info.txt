@@ -1,0 +1,5 @@
+Goals for this model:
+
+
+running the model
+python -m models.does_this_even_work.run --base_dir models/does_this_even_work

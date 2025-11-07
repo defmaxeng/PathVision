@@ -2,6 +2,7 @@
 images/
 archive/
 tools/
+output_videos/
 
 # Model weights and checkpoints
 *.pth
@@ -12,8 +13,8 @@ tools/
 __pycache__/
 *.pyc
 .env
-venv/
 env/
+vrtlvenv
 
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
@@ -30,3 +31,6 @@ datasets/
 saved_models/
 
 *.png
+
+# test python files
+test.py

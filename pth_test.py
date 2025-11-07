@@ -1,53 +1,25 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import cv2
 import json
 import numpy as np
 from torchvision import transforms
 from pytorch_architectures.resnet18 import ResNet18
+from training_tools.maskedMSELoss import MaskedMSELoss
 
 # ========== Load Model ==========
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
 model = ResNet18(4, 48)
-model_path = "models/first_attempt/weights.pth"
+model_path = "models/mini_batch_gradient_descent/trial2_lower_batch_size/weights.pth"
 ckpt = torch.load(model_path, map_location=device)
 
 # Strict load to be sure shapes/keys match
 model.load_state_dict(ckpt['model_state_dict'], strict=True)
 model.to(device)
-model.train()
+model.eval()
 print("Model loaded successfully")
 
-# ----- WEIGHT SANITY PROBE (choose a layer to watch) -----
-named = dict(model.named_parameters())
-param_name = None
-for candidate in ["conv1.weight", "backbone.conv1.weight", "features.0.weight"]:
-    if candidate in named:
-        param_name = candidate
-        break
-if param_name is None:
-    param_name = next(iter(named.keys()))  # fallback
-
-watch_param = named[param_name]
-
-@torch.no_grad()
-def stat_line(t, tag="w"):
-    t32 = t.detach().float()
-    return (f"{tag} mean={t32.mean():.6f} std={t32.std():.6f} "
-            f"min={t32.min():.6f} max={t32.max():.6f} L2={t32.norm():.6f}")
-
-@torch.no_grad()
-def l2_diff(a, b):
-    return (a.detach().float() - b.detach().float()).norm().item()
-
-with torch.no_grad():
-    init_snapshot = watch_param.clone()
-    prev_snapshot = watch_param.clone()
-    print(f"Watching layer: {param_name}")
-    print("INIT", stat_line(init_snapshot, "w0"))
 
 # Setup preprocessing (must match training)
 transform = transforms.Compose([
@@ -55,18 +27,15 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# Setup criterion
-class MaskedMSELoss(nn.Module):
-    def forward(self, pred, target, mask):
-        diff2 = (pred - target) ** 2 * mask
-        return diff2.sum() / mask.sum().clamp(min=1)
 
 criterion = MaskedMSELoss()
 
 # ========== Process JSON File Sequentially ==========
 json_path = "images/256x144/label_data_0313_256x144.json"
-resolution = "256x144"
-width = 256
+resolution = 256, 144
+base_dir = "images/256x144"
+
+
 
 print("Starting sequential processing of JSON file...")
 print("Controls: Press 'q' to quit, any other key to continue to next image")
@@ -89,15 +58,15 @@ with open(json_path, 'r', encoding="utf-8") as f:
             h_samples = data['h_samples']
 
             # Load image
-            image_path = f"images/{resolution}/{raw_file}"
-            image = cv2.imread(image_path)
+            image_path = f"{base_dir}/{raw_file}"
+            image = cv2.imread("images/256x144/clips/0313-1/6040/20.jpg")
             if image is None:
                 print(f"X Image not found: {image_path}")
                 continue
 
             # (Optional) ensure draw/eval canvas is 256x144 to match labels
-            if (image.shape[1], image.shape[0]) != (256, 144):
-                image = cv2.resize(image, (256, 144), interpolation=cv2.INTER_AREA)
+            if (image.shape[1], image.shape[0]) != resolution:
+                image = cv2.resize(image, resolution, interpolation=cv2.INTER_AREA)
 
             print(f"\nProcessing image {line_num + 1}: {raw_file}")
 
@@ -137,17 +106,7 @@ with open(json_path, 'r', encoding="utf-8") as f:
             # Print results
             print(f"Loss: {loss:.2f}, Accuracy: {accuracy:.1f}%, Valid points: {int(valid_points)}")
 
-            # ---- WEIGHT SANITY PRINT EVERY 100 IMAGES ----
-            if (line_num + 1) % 100 == 0:
-                with torch.no_grad():
-                    w_now = watch_param
-                    w_stats = stat_line(w_now, "w")
-                    d_prev = l2_diff(w_now, prev_snapshot)
-                    d_init = l2_diff(w_now, init_snapshot)
-                    dbg = (f"[Img {line_num+1}] {w_stats} | dL2(prev)={d_prev:.6f} dL2(init)={d_init:.6f}")
-                    print(dbg)
-                    prev_snapshot = w_now.clone()
-
+            
             # Visualization (points)
             display_image = image.copy()
             for line_idx, (pred_line, gt_line) in enumerate(zip(prediction, ground_truth_lanes)):
@@ -156,7 +115,7 @@ with open(json_path, 'r', encoding="utf-8") as f:
                     yy = h_samples[y]
                     if gx != -2:
                         cv2.circle(display_image, (int(gx), int(yy)), 1, (0, 0, 255), -1)  # GT red
-                    if px >= 0 and 0 <= px <= width:
+                    if px >= 0 and 0 <= px <= resolution[0]:
                         cv2.circle(display_image, (int(px), int(yy)), 1, (0, 255, 0), -1)  # Pred green
 
             # Mean bias (debug)
@@ -200,5 +159,3 @@ if processed_images > 0:
     print(f"Total correct points: {int(total_correct)}")
 else:
     print("\nNo images were successfully processed.")
-
-vowels = "aeiouAEIOU"
