@@ -1,0 +1,7 @@
+Goals for this model:
+
+
+How to run: 
+
+from the root directory, run: 
+python -m models.mini_batch_gradient_descent.trial1.run --base_dir models/mini_batch_gradient_descent/trial1

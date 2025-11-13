@@ -1,0 +1,5 @@
+Epoch [1/10], Image [2858], Avg Loss: 2882.0831
+Epoch [2/10], Image [2858], Avg Loss: 511.8938
+Epoch [3/10], Image [2858], Avg Loss: 497.4942
+Epoch [4/10], Image [2858], Avg Loss: 485.5788
+Epoch [5/10], Image [2858], Avg Loss: 470.4768

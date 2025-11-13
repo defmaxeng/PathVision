@@ -1,0 +1,4 @@
+Goals for this model:
+
+Lower the batch size so that images with rarer features have a bigger weight
+python -m models.mini_batch_gradient_descent.trial2_lower_batch_size.run --base_dir models/mini_batch_gradient_descent/trial2_lower_batch_size

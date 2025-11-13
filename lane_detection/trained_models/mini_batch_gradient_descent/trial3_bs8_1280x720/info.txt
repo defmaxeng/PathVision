@@ -1,0 +1,5 @@
+Goals for this model:
+
+
+running the model
+python -m models.mini_batch_gradient_descent.trial3_bs8_1280x720.run --base_dir models/mini_batch_gradient_descent/trial3_bs8_1280x720
