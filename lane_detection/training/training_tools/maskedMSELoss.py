@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.nn.functional as F
 
 class MaskedMSELoss(nn.Module):
     def __init__(self):

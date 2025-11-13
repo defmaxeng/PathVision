@@ -3,6 +3,7 @@ import cv2
 import torch
 from torchvision import transforms
 import random
+import numpy as np
 
 # Stochastic Gradient Descent
 def sgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_dir, print_every=50):
@@ -75,6 +76,21 @@ def sgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_di
                 'optimizer_state_dict': optimizer.state_dict(),
                 
             }, f"{base_dir}/weights.pth")
+
+
+def eval_cubic_bezier(P, num_samples=100):
+    """
+    P: (4,2) array of control points [[x0,y0],[x1,y1],[x2,y2],[x3,y3]] in pixels
+    returns: (num_samples,2) sampled points along the curve
+    """
+    t = np.linspace(0.0, 1.0, num_samples).reshape(-1, 1)
+    B0 = (1 - t) ** 3
+    B1 = 3 * (1 - t) ** 2 * t
+    B2 = 3 * (1 - t) * (t ** 2)
+    B3 = t ** 3
+    # shape: (num_samples, 1) @ (1, 2) broadcasts to (num_samples, 2)
+    pts = B0 * P[0] + B1 * P[1] + B2 * P[2] + B3 * P[3]
+    return pts
 
 # Mini_Batch Gradient Descent        
 def mbgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_dir, batch_size=16):
@@ -149,7 +165,12 @@ def mbgd(model, json_file_path, criterion, optimizer, epochs, resolution, base_d
 
                     # c. Run the network
                     optimizer.zero_grad(set_to_none=True)                                           # 1. Clear the Gradient
-                    outputs = model(input_batch_tensor)                                             # 2. For-Prop
+                    outputs = model(input_batch_tensor) # (b, out_rows, out_cols)                                            # 2. For-Prop
+
+
+
+
+
                     loss = criterion(outputs, lanes_label_batch_tensor, mask_batch_tensor)          # 3. Calculate Loss
                     loss.backward()                                                                 # 4. Back-Prop
                     optimizer.step()                                                                # 5. Gradient Descent
